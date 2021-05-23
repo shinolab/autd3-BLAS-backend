@@ -3,7 +3,7 @@
 // Created Date: 17/05/2021
 // Author: Shun Suzuki
 // -----
-// Last Modified: 17/05/2021
+// Last Modified: 23/05/2021
 // Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 // -----
 // Copyright (c) 2021 Hapis Lab. All rights reserved.
@@ -22,9 +22,8 @@ using autd::gain::holo::BLASBackend;
 using namespace std;
 
 string GetAdapterName() {
-  size_t size;
-  auto adapters = autd::link::SOEMLink::EnumerateAdapters(&size);
-  for (size_t i = 0; i < size; i++) {
+  auto adapters = autd::link::SOEMLink::enumerate_adapters();
+  for (size_t i = 0; i < adapters.size(); i++) {
     auto& [fst, snd] = adapters[i];
     cout << "[" << i << "]: " << fst << ", " << snd << endl;
   }
@@ -34,7 +33,7 @@ string GetAdapterName() {
   cin >> index;
   cin.ignore();
 
-  return adapters[index].second;
+  return adapters[index].name;
 }
 
 inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<double>& amps) {
@@ -52,40 +51,40 @@ inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<dou
   const auto backend = BLASBackend::Create();
   switch (idx) {
     case 0:
-      return autd::gain::holo::HoloGainSDP::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainSDP::create(backend, foci, amps);
     case 1:
-      return autd::gain::holo::HoloGainEVD::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainEVD::create(backend, foci, amps);
     case 2:
-      return autd::gain::holo::HoloGainGS::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainGS::create(backend, foci, amps);
     case 3:
-      return autd::gain::holo::HoloGainGSPAT::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainGSPAT::create(backend, foci, amps);
     case 4:
-      return autd::gain::holo::HoloGainNaive::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainNaive::create(backend, foci, amps);
     case 5:
-      return autd::gain::holo::HoloGainLM::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainLM::create(backend, foci, amps);
     default:
-      return autd::gain::holo::HoloGainSDP::Create(backend, foci, amps);
+      return autd::gain::holo::HoloGainSDP::create(backend, foci, amps);
   }
 }
 
 int main() {
   try {
     autd::Controller autd;
-    autd.geometry()->AddDevice(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
+    autd.geometry()->add_device(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
     const auto ifname = GetAdapterName();
-    if (auto res = autd.OpenWith(autd::link::SOEMLink::Create(ifname, autd.geometry()->num_devices())); res.is_err()) {
+    if (auto res = autd.open(autd::link::SOEMLink::create(ifname, autd.geometry()->num_devices())); res.is_err()) {
       std::cerr << res.unwrap_err() << std::endl;
       return ENXIO;
     }
 
     autd.geometry()->wavelength() = 8.5;
 
-    autd.Clear().unwrap();
-    autd.Synchronize().unwrap();
+    autd.clear().unwrap();
+    autd.synchronize().unwrap();
 
     autd.silent_mode() = true;
 
-    const auto m = autd::modulation::Sine::Create(150);  // 150Hz AM
+    const auto m = autd::modulation::Sine::create(150);  // 150Hz AM
 
     const auto center = autd::Vector3(TRANS_SPACING_MM * ((NUM_TRANS_X - 1) / 2.0), TRANS_SPACING_MM * ((NUM_TRANS_Y - 1) / 2.0), 150.0);
 
@@ -96,17 +95,17 @@ int main() {
       const auto g = SelectOpt(foci, amps);
       if (g == nullptr) break;
 
-      autd.Send(g, m).unwrap();
+      autd.send(g, m).unwrap();
 
       cout << "press any key to finish..." << endl;
       cin.ignore();
 
       cout << "finish." << endl;
-      autd.Stop().unwrap();
+      autd.stop().unwrap();
     }
 
-    autd.Clear().unwrap();
-    autd.Close().unwrap();
+    autd.clear().unwrap();
+    autd.close().unwrap();
 
   } catch (exception& e) {
     std::cerr << e.what() << std::endl;

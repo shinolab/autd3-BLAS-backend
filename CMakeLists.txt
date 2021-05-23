@@ -22,6 +22,8 @@ endif()
 
 set(EIGEN_PATH ${PROJECT_SOURCE_DIR}/autd3/client/deps/Eigen3)
 
+add_compile_definitions(_USE_MATH_DEFINES)
+
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH};${BLAS_LIB_DIR}")
 set(BLA_STATIC ON)
 find_package(BLAS REQUIRED)
