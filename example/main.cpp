@@ -3,7 +3,7 @@
 // Created Date: 17/05/2021
 // Author: Shun Suzuki
 // -----
-// Last Modified: 23/05/2021
+// Last Modified: 03/06/2021
 // Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 // -----
 // Copyright (c) 2021 Hapis Lab. All rights reserved.
@@ -69,20 +69,20 @@ inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<dou
 
 int main() {
   try {
-    autd::Controller autd;
-    autd.geometry()->add_device(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
+    auto autd = autd::Controller::create();
+    autd->geometry()->add_device(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
     const auto ifname = GetAdapterName();
-    if (auto res = autd.open(autd::link::SOEMLink::create(ifname, autd.geometry()->num_devices())); res.is_err()) {
+    if (auto res = autd->open(autd::link::SOEMLink::create(ifname, autd->geometry()->num_devices())); res.is_err()) {
       std::cerr << res.unwrap_err() << std::endl;
       return ENXIO;
     }
 
-    autd.geometry()->wavelength() = 8.5;
+    autd->geometry()->wavelength() = 8.5;
 
-    autd.clear().unwrap();
-    autd.synchronize().unwrap();
+    autd->clear().unwrap();
+    autd->synchronize().unwrap();
 
-    autd.silent_mode() = true;
+    autd->silent_mode() = true;
 
     const auto m = autd::modulation::Sine::create(150);  // 150Hz AM
 
@@ -95,17 +95,17 @@ int main() {
       const auto g = SelectOpt(foci, amps);
       if (g == nullptr) break;
 
-      autd.send(g, m).unwrap();
+      autd->send(g, m).unwrap();
 
       cout << "press any key to finish..." << endl;
       cin.ignore();
 
       cout << "finish." << endl;
-      autd.stop().unwrap();
+      autd->stop().unwrap();
     }
 
-    autd.clear().unwrap();
-    autd.close().unwrap();
+    autd->clear().unwrap();
+    autd->close().unwrap();
 
   } catch (exception& e) {
     std::cerr << e.what() << std::endl;
