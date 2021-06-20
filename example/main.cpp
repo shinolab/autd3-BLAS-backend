@@ -3,7 +3,7 @@
 // Created Date: 17/05/2021
 // Author: Shun Suzuki
 // -----
-// Last Modified: 03/06/2021
+// Last Modified: 20/06/2021
 // Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 // -----
 // Copyright (c) 2021 Hapis Lab. All rights reserved.
@@ -22,7 +22,7 @@ using autd::gain::holo::BLASBackend;
 using namespace std;
 
 string GetAdapterName() {
-  auto adapters = autd::link::SOEMLink::enumerate_adapters();
+  auto adapters = autd::link::SOEM::enumerate_adapters();
   for (size_t i = 0; i < adapters.size(); i++) {
     auto& [fst, snd] = adapters[i];
     cout << "[" << i << "]: " << fst << ", " << snd << endl;
@@ -51,19 +51,19 @@ inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<dou
   const auto backend = BLASBackend::Create();
   switch (idx) {
     case 0:
-      return autd::gain::holo::HoloGainSDP::create(backend, foci, amps);
+      return autd::gain::holo::HoloSDP::create(backend, foci, amps);
     case 1:
-      return autd::gain::holo::HoloGainEVD::create(backend, foci, amps);
+      return autd::gain::holo::HoloEVD::create(backend, foci, amps);
     case 2:
-      return autd::gain::holo::HoloGainGS::create(backend, foci, amps);
+      return autd::gain::holo::HoloGS::create(backend, foci, amps);
     case 3:
-      return autd::gain::holo::HoloGainGSPAT::create(backend, foci, amps);
+      return autd::gain::holo::HoloGSPAT::create(backend, foci, amps);
     case 4:
-      return autd::gain::holo::HoloGainNaive::create(backend, foci, amps);
+      return autd::gain::holo::HoloNaive::create(backend, foci, amps);
     case 5:
-      return autd::gain::holo::HoloGainLM::create(backend, foci, amps);
+      return autd::gain::holo::HoloLM::create(backend, foci, amps);
     default:
-      return autd::gain::holo::HoloGainSDP::create(backend, foci, amps);
+      return autd::gain::holo::HoloSDP::create(backend, foci, amps);
   }
 }
 
@@ -72,7 +72,7 @@ int main() {
     auto autd = autd::Controller::create();
     autd->geometry()->add_device(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
     const auto ifname = GetAdapterName();
-    if (auto res = autd->open(autd::link::SOEMLink::create(ifname, autd->geometry()->num_devices())); res.is_err()) {
+    if (auto res = autd->open(autd::link::SOEM::create(ifname, autd->geometry()->num_devices())); res.is_err()) {
       std::cerr << res.unwrap_err() << std::endl;
       return ENXIO;
     }
@@ -80,7 +80,6 @@ int main() {
     autd->geometry()->wavelength() = 8.5;
 
     autd->clear().unwrap();
-    autd->synchronize().unwrap();
 
     autd->silent_mode() = true;
 
