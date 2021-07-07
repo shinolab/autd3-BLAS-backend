@@ -3,19 +3,19 @@
 // Created Date: 17/05/2021
 // Author: Shun Suzuki
 // -----
-// Last Modified: 20/06/2021
+// Last Modified: 07/07/2021
 // Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 // -----
 // Copyright (c) 2021 Hapis Lab. All rights reserved.
 //
 
+#include <autd3.hpp>
+#include <autd3/gain/holo.hpp>
+#include <autd3/link/soem.hpp>
+#include <autd3/modulation/primitive.hpp>
 #include <iostream>
 
-#include "autd3.hpp"
 #include "blas_backend.hpp"
-#include "holo_gain.hpp"
-#include "primitive_modulation.hpp"
-#include "soem_link.hpp"
 
 using autd::NUM_TRANS_X, autd::NUM_TRANS_Y, autd::TRANS_SPACING_MM;
 using autd::gain::holo::BLASBackend;
@@ -48,7 +48,7 @@ inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<dou
   std::stringstream s(in);
   if (const auto empty = in == "\n"; !(s >> idx) || idx >= opts.size() || empty) return nullptr;
 
-  const auto backend = BLASBackend::Create();
+  const auto backend = BLASBackend::create();
   switch (idx) {
     case 0:
       return autd::gain::holo::HoloSDP::create(backend, foci, amps);
@@ -72,14 +72,11 @@ int main() {
     auto autd = autd::Controller::create();
     autd->geometry()->add_device(autd::Vector3(0, 0, 0), autd::Vector3(0, 0, 0));
     const auto ifname = GetAdapterName();
-    if (auto res = autd->open(autd::link::SOEM::create(ifname, autd->geometry()->num_devices())); res.is_err()) {
-      std::cerr << res.unwrap_err() << std::endl;
-      return ENXIO;
-    }
+    autd->open(autd::link::SOEM::create(ifname, autd->geometry()->num_devices()));
 
     autd->geometry()->wavelength() = 8.5;
 
-    autd->clear().unwrap();
+    autd->clear();
 
     autd->silent_mode() = true;
 
@@ -94,17 +91,17 @@ int main() {
       const auto g = SelectOpt(foci, amps);
       if (g == nullptr) break;
 
-      autd->send(g, m).unwrap();
+      autd->send(g, m);
 
       cout << "press any key to finish..." << endl;
       cin.ignore();
 
       cout << "finish." << endl;
-      autd->stop().unwrap();
+      autd->stop();
     }
 
-    autd->clear().unwrap();
-    autd->close().unwrap();
+    autd->clear();
+    autd->close();
 
   } catch (exception& e) {
     std::cerr << e.what() << std::endl;

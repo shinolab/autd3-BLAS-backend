@@ -3,7 +3,7 @@
 // Created Date: 17/05/2021
 // Author: Shun Suzuki
 // -----
-// Last Modified: 17/05/2021
+// Last Modified: 07/07/2021
 // Modified By: Shun Suzuki (suzuki@hapis.k.u-tokyo.ac.jp)
 // -----
 // Copyright (c) 2021 Hapis Lab. All rights reserved.
@@ -36,7 +36,7 @@ constexpr auto AUTD_POSVC = LAPACKE_zposv;
 constexpr auto AUTD_CPY = LAPACKE_dlacpy;
 constexpr auto AUTD_CPYC = LAPACKE_zlacpy;
 
-BackendPtr BLASBackend::Create() { return std::make_shared<BLASBackend>(); }
+BackendPtr BLASBackend::create() { return std::make_shared<BLASBackend>(); }
 
 bool BLASBackend::supports_svd() { return true; }
 bool BLASBackend::supports_evd() { return true; }
