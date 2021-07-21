@@ -14,4 +14,4 @@ else()
 endif()
   
 add_executable(example main.cpp)
-target_link_libraries(example autd3 holo_gain soem_link blas_backend)
+target_link_libraries(example autd3 gain_holo link_soem blas_backend)

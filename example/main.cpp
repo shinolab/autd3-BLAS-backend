@@ -51,19 +51,19 @@ inline autd::GainPtr SelectOpt(std::vector<autd::Vector3>& foci, std::vector<dou
   const auto backend = BLASBackend::create();
   switch (idx) {
     case 0:
-      return autd::gain::holo::HoloSDP::create(backend, foci, amps);
+      return autd::gain::holo::SDP::create(backend, foci, amps);
     case 1:
-      return autd::gain::holo::HoloEVD::create(backend, foci, amps);
+      return autd::gain::holo::EVD::create(backend, foci, amps);
     case 2:
-      return autd::gain::holo::HoloGS::create(backend, foci, amps);
+      return autd::gain::holo::GS::create(backend, foci, amps);
     case 3:
-      return autd::gain::holo::HoloGSPAT::create(backend, foci, amps);
+      return autd::gain::holo::GSPAT::create(backend, foci, amps);
     case 4:
-      return autd::gain::holo::HoloNaive::create(backend, foci, amps);
+      return autd::gain::holo::Naive::create(backend, foci, amps);
     case 5:
-      return autd::gain::holo::HoloLM::create(backend, foci, amps);
+      return autd::gain::holo::LM::create(backend, foci, amps);
     default:
-      return autd::gain::holo::HoloSDP::create(backend, foci, amps);
+      return autd::gain::holo::SDP::create(backend, foci, amps);
   }
 }
 
