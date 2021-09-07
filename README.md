@@ -1,3 +1,5 @@
+# **This repository have been merged into [autd3 main repository](https://github.com/shinolab/autd3-library-software).**
+
 # AUTD3 BLAS Backend
 
 This repository provides a calculation backend for HoloGain (multiple foci).
